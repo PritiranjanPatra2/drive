@@ -10,7 +10,7 @@ function SharedWithMe() {
       <div className='flex'>
         <Sidebar />
         <div className='flex flex-col justify-center items-center gap-2 w-full h-full'>
-          <h1 className='text-4xl self-start ml-4'>Shared with Me</h1>
+          <h1 className='text-4xl self-start ml-4  pl-6 pt-4'>Shared with Me</h1>
           <img src={shared} alt="shared" className='w-96 mt-4' />
           <h1 className='text-2xl'>No files shared with you</h1>
           <p className=' text-lg text-center'>

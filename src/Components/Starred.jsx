@@ -10,7 +10,7 @@ function Starred() {
       <div className='flex'>
         <Sidebar />
         <div className='flex flex-col justify-center items-center gap-2 w-full h-full'>
-        <h1 className=' text-4xl self-start'>Bin</h1>
+        <h1 className=' text-4xl self-start  pl-6 pt-4'>Bin</h1>
           <img src={starred} alt="starred" className='w-96' />
           <h1 className='text-2xl'>No starred files</h1>
           <p className='text-slate-950 text-lg text-center'>

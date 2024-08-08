@@ -11,17 +11,17 @@
 }
 body.light-mode {
     background-color: white;
-    --text: black;
+  color: black;
   }
   
   /* Dark theme */
   body.dark-mode {
     background-color: black;
-    --text: white;
+    color: white;
   }
 body{
     width: 100%;
-    background-color: var(--background);
-    color: var(--text);
+    background-color: white;
+    color: black;
     transition: background-color 0.3s, color 0.3s; 
 }

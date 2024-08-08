@@ -10,7 +10,7 @@ function Spam() {
       <div className='flex'>
         <Sidebar />
         <div className='flex flex-col justify-center items-center gap-2 w-full h-full'>
-          <h1 className='text-4xl self-start ml-4'>Spam</h1>
+          <h1 className='text-4xl self-start ml-4  pl-6 pt-4'>Spam</h1>
           <div className='bg-gray-200 p-4 w-full text-center'>
             Files in spam won't appear anywhere else in Drive. Files are permanently removed after 30 days.
           </div>

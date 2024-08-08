@@ -10,7 +10,7 @@ function Bin() {
       <div className='flex'>
         <Sidebar />
         <div className='flex flex-col justify-center items-center gap-2 w-full h-full'>
-        <h1 className=' text-4xl self-start'>Bin</h1>
+        <h1 className=' text-4xl self-start  pl-6 pt-4'>Bin</h1>
           <img src={bin} alt="bin" className='w-96' />
           <h1 className='text-2xl'>Nothing in the bin</h1>
           <p className=' text-lg text-center'>

@@ -1,9 +1,9 @@
 import React, { useContext, useEffect, useState } from 'react';
-import home from '../assets/home.avif';
+import home from '../assets/home.png';
 import GridViewIcon from '@mui/icons-material/GridView';
 import ViewListIcon from '@mui/icons-material/ViewList';
-import { db, storage } from '../firebase';
-import { collection, onSnapshot, deleteDoc, doc } from 'firebase/firestore';
+import { auth, db, storage } from '../firebase';
+import { collection, onSnapshot, deleteDoc, doc, query, where } from 'firebase/firestore';
 import { ref, deleteObject } from 'firebase/storage';
 import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -16,36 +16,39 @@ import Sidebar from './Sidebar';
 
 function Home() {
     const { files, setFiles, searchQuery } = useContext(authContext);
-    const [viewMode, setViewMode] = useState('list'); // Default view mode
-    const [triggerUpdate, setTriggerUpdate] = useState(false); // State to trigger Sidebar update
+    const [viewMode, setViewMode] = useState('list'); 
+    const [triggerUpdate, setTriggerUpdate] = useState(false); 
 
-    const notify1 = () => toast("File is successfully deleted");
-    const notify2 = () => toast("URL is copied to clipboard!!");
+    const deletedNotification = () => toast("File is successfully deleted");
+    const copiedNotification = () => toast("URL is copied to clipboard!!");
 
     useEffect(() => {
+        const user = auth.currentUser;
+        if (user) {
         const filesCollection = collection(db, "myfiles");
-        const unsubscribe = onSnapshot(filesCollection, (snapshot) => {
+        const q = query(filesCollection, where("uid", "==", user.uid));
+        const unsubscribe = onSnapshot(q, (snapshot) => {
             setFiles(snapshot.docs.map(doc => ({
                 id: doc.id,
-                data: doc.data()
+                data: doc.data()    
             })));
         }, (error) => {
             console.error("Error fetching files:", error);
         });
 
         return () => unsubscribe();
-    }, []);
+    }
+}, [setFiles]);
 
-    const changeBytes = (bytes, decimals = 2) => {
+    const changeBytes = (bytes) => {
         if (bytes === 0) return '0 Bytes';
         const k = 1024;
-        const dm = decimals < 0 ? 0 : decimals;
         const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
         const i = Math.floor(Math.log(bytes) / Math.log(k));
-        return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
     };
 
-    const handleDelete = async (fileId, fileURL, fileSize) => {
+    const handleDelete = async (fileId, fileURL) => {
         const confirmDelete = window.confirm("Are you sure you want to delete this file?");
         if (!confirmDelete) return;
 
@@ -55,9 +58,9 @@ function Home() {
 
             await deleteDoc(doc(db, "myfiles", fileId));
 
-            setFiles(files.filter(file => file.id !== fileId));
-            setTriggerUpdate(prev => !prev); // Trigger Sidebar update
-            notify1();
+           
+            setTriggerUpdate(prev => !prev); 
+            deletedNotification();
         } catch (error) {
             console.error("Error deleting file:", error);
             alert("Error deleting file: " + error.message);
@@ -67,7 +70,7 @@ function Home() {
     const handleCopy = async (fileURL) => {
         try {
             await navigator.clipboard.writeText(fileURL);
-            notify2();
+            copiedNotification();
         } catch (error) {
             console.error('Error copying URL:', error);
             alert('Failed to copy URL: ' + error.message);
@@ -81,16 +84,16 @@ function Home() {
     return (<>
         <Header />
         <div className='flex'>
-            <Sidebar triggerUpdate={triggerUpdate} /> {/* Pass triggerUpdate prop */}
-            <div className='p-8 w-full flex flex-col justify-start items-start'>
+            <Sidebar triggerUpdate={triggerUpdate} />
+            <div className='p-8 w-full flex flex-col justify-start items-start flex-wrap'>
                 <div className='flex justify-between items-center w-full'>
                     <h1 className='font-semibold text-3xl'>Home</h1>
                     <div className='flex gap-4 mb-4 border rounded'>
                         <button onClick={() => setViewMode('list')} className='p-2'>
-                            <ViewListIcon className={viewMode === 'list' ? 'text-blue-500' : ''} />
+                            <ViewListIcon className={viewMode === 'list' ? 'text-cyan-500' : ''} />
                         </button>
                         <button onClick={() => setViewMode('grid')} className='p-2'>
-                            <GridViewIcon className={viewMode === 'grid' ? 'text-blue-500' : ''} />
+                            <GridViewIcon className={viewMode === 'grid' ? 'text-cyan-500' : ''} />
                         </button>
                     </div>
                 </div>
@@ -105,7 +108,7 @@ function Home() {
                                 <p><b>Actions</b></p>
                             </div>
                             {filteredFiles.map(file => (
-                                <div key={file.id} className='flex justify-between items-center w-full py-2 border-4 p-2 rounded-md mb-2 hover:bg-gray-600'>
+                                <div key={file.id} className='flex justify-between flex-wrap items-center w-full py-2 border-4 p-2 rounded-md mb-2 hover:bg-gray-600'>
                                     <a href={file.data.fileURL} target='_blank' rel='noopener noreferrer'>
                                         <p className='flex items-center gap-2'><InsertDriveFileIcon />{file.data.filename}</p>
                                     </a>
@@ -113,7 +116,7 @@ function Home() {
                                     <p>{changeBytes(file.data.size)}</p>
                                     <div>
                                         <button onClick={() => handleCopy(file.data.fileURL)}><ContentCopyIcon /></button>
-                                        <button onClick={() => handleDelete(file.id, file.data.fileURL, file.data.size)} className='border border-black rounded'>
+                                        <button onClick={() => handleDelete(file.id, file.data.fileURL)} className='border border-black rounded'>
                                             delete
                                         </button>
                                     </div>
@@ -132,7 +135,7 @@ function Home() {
                                     </a>
                                     <div className='mt-2 flex justify-center gap-2'>
                                         <button onClick={() => handleCopy(file.data.fileURL)}><ContentCopyIcon /></button>
-                                        <button onClick={() => handleDelete(file.id, file.data.fileURL, file.data.size)}>
+                                        <button onClick={() => handleDelete(file.id, file.data.fileURL)}>
                                             <DeleteIcon className="text-red-600 cursor-pointer" />
                                         </button>
                                     </div>
@@ -149,16 +152,15 @@ function Home() {
                 )}
 
                 <ToastContainer
-                    position="top-right"
-                    autoClose={5000}
+                    position="top-left"
+                    autoClose={4000}
                     hideProgressBar={false}
                     newestOnTop={false}
                     closeOnClick
                     rtl={false}
                     pauseOnFocusLoss
                     draggable
-                    pauseOnHover
-                    theme="light"
+                    theme="dark"
                 />
             </div>
         </div>

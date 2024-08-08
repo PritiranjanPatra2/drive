@@ -1,7 +1,7 @@
 import React from 'react';
 import Header from './Header';
 import Sidebar from './Sidebar';
-import computers from '../assets/computer.svg'; // Ensure you have the appropriate computers image
+import computers from '../assets/computer.svg'; 
 
 function Computers() {
   return (
@@ -10,7 +10,7 @@ function Computers() {
       <div className='flex'>
         <Sidebar />
         <div className='flex flex-col justify-center items-center gap-2 w-full h-full'>
-          <h1 className='text-4xl self-start ml-4'>Computers</h1>
+          <h1 className='text-4xl self-start ml-4  pl-6 pt-4'>Computers</h1>
           <img src={computers} alt="computers" className='w-96 mt-4' />
           <h1 className='text-2xl'>No folders syncing with Drive</h1>
           <p className='text-slate-950 text-lg text-center'>

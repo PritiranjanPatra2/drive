@@ -1,7 +1,8 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import AddIcon from '@mui/icons-material/Add';
+import AddTwoToneIcon from '@mui/icons-material/AddTwoTone';
 import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined';
 import DriveFolderUploadIcon from '@mui/icons-material/DriveFolderUpload';
+import CloudUploadTwoToneIcon from '@mui/icons-material/CloudUploadTwoTone';
 import ComputerIcon from '@mui/icons-material/Computer';
 import PeopleIcon from '@mui/icons-material/People';
 import ScheduleIcon from '@mui/icons-material/Schedule';
@@ -10,31 +11,37 @@ import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import DeleteIcon from '@mui/icons-material/Delete';
 import CloudOutlinedIcon from '@mui/icons-material/CloudOutlined';
 import { Modal } from '@mui/material';
-import { db, storage, serverTimestamp } from "../firebase";
+import { db, storage, serverTimestamp, auth } from "../firebase";
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { collection, addDoc, getDocs } from 'firebase/firestore';
 import { Link } from 'react-router-dom';
 
-function Sidebar({ triggerUpdate }) { // Accept triggerUpdate prop
+function Sidebar({ triggerUpdate }) { 
     const [open, setOpen] = useState(false);
     const [uploading, setUploading] = useState(false);
     const [file, setFile] = useState(null);
     const [usedStorage, setUsedStorage] = useState(0);
-    const totalStorage = 100 * 1024 * 1024 ; // 100 MB in bytes
+    const totalStorage = 1000 * 1024 * 1024 ;
+    const user=auth.currentUser;
 
     useEffect(() => {
         async function fetchFiles() {
             const querySnapshot = await getDocs(collection(db, "myfiles"));
+            console.log(querySnapshot);
+            
             let totalSize = 0;
             querySnapshot.forEach(doc => {
+                console.log(doc.data().size);
                 totalSize += doc.data().size;
             });
             setUsedStorage(totalSize);
         }
         fetchFiles();
     }, [triggerUpdate]);
+    
 
     function handleFile(e) {
+        console.log(e.target.files);
         if (e.target.files[0]) {
             setFile(e.target.files[0]);
         }
@@ -42,7 +49,7 @@ function Sidebar({ triggerUpdate }) { // Accept triggerUpdate prop
 
     const handleUpload = async (e) => {
         e.preventDefault();
-        if (!file) {
+        if (!file|| !user) {
             alert("Please select a file first.");
             return;
         }
@@ -53,22 +60,16 @@ function Sidebar({ triggerUpdate }) { // Accept triggerUpdate prop
             // Upload file
             const fileRef = ref(storage, `files/${file.name}`);
             const snapshot = await uploadBytes(fileRef, file);
-
-            // Get file URL
             const url = await getDownloadURL(fileRef);
-
             // Add file information to Firestore
             await addDoc(collection(db, "myfiles"), {
                 timestamp: serverTimestamp(),
                 filename: file.name,
                 fileURL: url,
-                size: snapshot.metadata.size
+                size: snapshot.metadata.size,
+                uid:user.uid
             });
-
-            // Update used storage
             setUsedStorage(prevUsedStorage => prevUsedStorage + snapshot.metadata.size);
-
-            // Reset states
             setUploading(false);
             setFile(null);
             setOpen(false);
@@ -85,14 +86,14 @@ function Sidebar({ triggerUpdate }) { // Accept triggerUpdate prop
         <>
             <Modal open={open} onClose={() => setOpen(false)} 
                 style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <div className='m-auto w-96 h-36 rounded bg-gray-500 p-4'>
+                <div className='m-auto w-96 h-36 rounded bg-slate-500 p-4'>
                     <form onSubmit={handleUpload} className='flex justify-center items-center flex-col w-full h-full gap-4 text-white'>
                         <h3 className='font-bold '>Select the file you want to upload</h3>
                         <div>
-                            {uploading ? <h3>Uploading...</h3> :
+                            {uploading ? <h3><CloudUploadTwoToneIcon/>Uploading...</h3> :
                                 (<div className='flex justify-center items-center flex-col w-full h-full gap-4'>
                                     <input type="file" className='modal_file' onChange={handleFile} />
-                                    <input type="submit" value="Upload" className='modal_submit bg-red-500 py-2 px-4 rounded' />
+                                    <input type="submit" value="Upload" className='modal_submit bg-black py-2 px-4 rounded-2xl' />
                                 </div>)
                             }
                         </div>
@@ -100,9 +101,9 @@ function Sidebar({ triggerUpdate }) { // Accept triggerUpdate prop
                 </div>
             </Modal>
 
-            <div className='sidebarContainer flex flex-col justify-between p-8  w-1/5 gap-4 h-full mt-3.5'>
-                <button className='flex justify-center items-center gap-5 shadow-md p-2 border rounded shadow-black w-2/4  outline-0 cursor-pointer' onClick={() => setOpen(true)}>
-                    <AddIcon />
+            <div className='sidebarContainer flex flex-col justify-between p-8   gap-4 h-full    mt-3.5 border-r-2'>
+                <button className='flex justify-center items-center gap-1 shadow-md p-2 border rounded shadow-black w-2/4  outline-0 cursor-pointer' onClick={() => setOpen(true)}>
+                    <AddTwoToneIcon />
                     <span>New</span>
                 </button>
                 <div>
@@ -122,7 +123,7 @@ function Sidebar({ triggerUpdate }) { // Accept triggerUpdate prop
                     <div className='h-2 rounded-3xl bg-gray-300 w-full'>
                         <div className='bg-blue-600 h-full rounded-3xl' style={{ width: `${usedPercentage}%` }}></div>
                     </div>
-                    <span>{(usedStorage / 1024 / 1024).toFixed(2)} MB of 100 MB</span>
+                    <span>{(usedStorage / 1024 / 1024).toFixed(2)} MB of 1GB</span>
                 </div>
             </div>
         </>
