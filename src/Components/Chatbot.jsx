@@ -102,7 +102,7 @@ const Chatbot = () => {
                 {questions.map(q => (
                   <li key={q.id} className="mb-2">
                     <button 
-                      className="text-blue-600 hover:underline focus:outline-none"
+                      className="text-blue-600 hover:underline focus:outline-none justify-start self-start"
                       onClick={() => handleQuestionSelect(q)}
                     >
                       {q.question}
