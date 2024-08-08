@@ -85,7 +85,7 @@ function Home() {
         <Header />
         <div className='flex'>
             <Sidebar triggerUpdate={triggerUpdate} />
-            <div className='p-8 w-full flex flex-col justify-start items-start flex-wrap'>
+            <div className='p-8 w-full flex flex-col justify-start items-start'>
                 <div className='flex justify-between items-center w-full'>
                     <h1 className='font-semibold text-3xl'>Home</h1>
                     <div className='flex gap-4 mb-4 border rounded'>
