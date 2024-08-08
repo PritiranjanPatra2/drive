@@ -105,7 +105,7 @@
           <Route path='/storage' element={<ProtectedRoute><Storage/></ProtectedRoute>}/>
           
         </Routes>
-      {user!=null &&<Chatbot/>}
+      {user!=null&&<Chatbot/>}
       </authContext.Provider>
     );
   }
