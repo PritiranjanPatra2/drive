@@ -88,15 +88,6 @@ function App() {
         </div>
     );
 }
-const [isChatbotOpen, setIsChatbotOpen] = useState(false);
-
-const openChatbot = () => {
-  setIsChatbotOpen(true);
-};
-
-const closeChatbot = () => {
-  setIsChatbotOpen(false);
-};
 
   return (
     <authContext.Provider value={{ files, setFiles, searchQuery, setSearchQuery, signIn, photoURL, handleLogout, sortAscFilesByDate, sortDescFilesByDate, 
